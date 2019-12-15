@@ -1,11 +1,12 @@
-var express = require('express');
-var app = express();
-var bodyParser = require('body-parser');
-var firebase = require('firebase/app');
+let express = require('express');
+let app = express();
+let bodyParser = require('body-parser');
+let firebase = require('firebase/app');
 require('firebase/firestore');
 
 // Firebase setup
-var firebaseConfig = {
+// "It's good practice to store these in an environment variable file"
+let firebaseConfig = {
   apiKey: "AIzaSyAC2gdX4vgp-rr4fpIxYKrAd8kSQvIoBao",
   authDomain: "oh-whats-express.firebaseapp.com",
   databaseURL: "https://oh-whats-express.firebaseio.com",
@@ -16,7 +17,7 @@ var firebaseConfig = {
   measurementId: "G-022W49PM85"
 };
 firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
+let db = firebase.firestore();
 
 // Express
 app.use(bodyParser.json());
@@ -28,8 +29,8 @@ app.use(function(req, res, next){
 
 // Add message
 app.post('/:collection', function(req, res){
-  var body = req.body;
-  var now = new Date()
+  let body = req.body;
+  let now = new Date()
   if (!body.message) {
     res.send("Time: " + now.toString() + '\n' +
              "No message given!");
@@ -48,7 +49,7 @@ app.post('/:collection', function(req, res){
 
 // Get all collection messages
 app.get('/:collection', function(req, res){
-  var message = "";
+  let message = "";
   db.collection(req.params.collection).orderBy('time', 'desc').get()
     .then((snapshot) => {
       snapshot.forEach((doc) => {
