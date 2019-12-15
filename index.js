@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
 var firebase = require('firebase/app');
 require('firebase/firestore');
 
@@ -18,11 +19,34 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
 // Express
+app.use(bodyParser.json());
+
 app.use(function(req, res, next){
-  console.log("Request received at: " + Date.now());
+  console.log("Request received at:", Date.now());
   next();
 });
 
+// Add message
+app.post('/:collection', function(req, res){
+  var body = req.body;
+  var now = new Date()
+  if (!body.message) {
+    res.send("Time: " + now.toString() + '\n' +
+             "No message given!");
+  } else {
+    db.collection(req.params.collection).add({
+      "time": now.getTime(),
+      "message": body.message
+    }).then(ref => {
+      console.log("Added message with ID:", ref.id);
+      console.log("Message:", body.message);
+      res.send("Time: " + now.toString() + '\n' +
+               "Received message: " + body.message);
+    });
+  }
+});
+
+// Get all collection messages
 app.get('/:collection', function(req, res){
   var message = "";
   db.collection(req.params.collection).get()
@@ -31,8 +55,11 @@ app.get('/:collection', function(req, res){
         console.log(doc.id, '=>', doc.data());
         message += doc.data().name + '\n';
       });
-     console.log(message);
-     res.send("Hello " + req.params.collection + '\n' + message);
+      console.log(message);
+      if (!message) {
+        message = "Nothing here!";
+      }
+      res.send("Hello " + req.params.collection + '\n' + message);
     })
     .catch((err) => {
       console.log("Error getting documents", err);
