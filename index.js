@@ -16,9 +16,6 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
-db.collection('cities').doc('New York').set({
-  "name": "New York City",
-});
 
 // Express
 app.use(function(req, res, next){
@@ -26,8 +23,20 @@ app.use(function(req, res, next){
   next();
 });
 
-app.get('/hello', function(req, res){
-  res.send("Hello " + req.query.planet);
+app.get('/:collection', function(req, res){
+  var message = "";
+  db.collection(req.params.collection).get()
+    .then((snapshot) => {
+      snapshot.forEach((doc) => {
+        console.log(doc.id, '=>', doc.data());
+        message += doc.data().name + '\n';
+      });
+     console.log(message);
+     res.send("Hello " + req.params.collection + '\n' + message);
+    })
+    .catch((err) => {
+      console.log("Error getting documents", err);
+    });
 });
 
 app.listen(3000);
