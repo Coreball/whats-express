@@ -49,17 +49,18 @@ app.post('/:collection', function(req, res){
 // Get all collection messages
 app.get('/:collection', function(req, res){
   var message = "";
-  db.collection(req.params.collection).get()
+  db.collection(req.params.collection).orderBy('time', 'desc').get()
     .then((snapshot) => {
       snapshot.forEach((doc) => {
         console.log(doc.id, '=>', doc.data());
-        message += doc.data().name + '\n';
+        message += new Date(doc.data().time).toString().slice(0, 24)
+                 + ": " +  doc.data().message + '\n';
       });
       console.log(message);
       if (!message) {
         message = "Nothing here!";
       }
-      res.send("Hello " + req.params.collection + '\n' + message);
+      res.send("Collection: " + req.params.collection + '\n\n' + message);
     })
     .catch((err) => {
       console.log("Error getting documents", err);
